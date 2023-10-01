@@ -12,6 +12,7 @@ var config = {
         }
     },
     scene: {
+        key: 'myScene',
         preload: preload,
         create: create,
         update: update
@@ -21,10 +22,16 @@ var config = {
 var score = 0;
 var scoreText;
 var gameOver = false;
-
 var player2;
 
 var game = new Phaser.Game(config);
+
+var restartButton = document.getElementById('restart-button');
+restartButton.addEventListener('click', function () {
+    game.scene.stop('myScene');
+    game.scene.start('myScene');
+    gameOver = true;
+});
 
 function preload(params) {
     this.load.image('sky', 'assets/sky.png');
@@ -99,8 +106,8 @@ function create(params) {
 
     cursors = this.input.keyboard.createCursorKeys();
 
-    // al colicionar con el player las estrellas se desactivan
-    this.physics.add.overlap(player, stars, collectStar, null, null);
+  
+  
 
     scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '32px', fill: '#000'});
 
@@ -108,7 +115,14 @@ function create(params) {
      
     this.physics.add.collider(bombs, platforms);
 
+    // detecta la colicion entre la bomba y el player
     this.physics.add.collider(player, bombs, hitBomb, null, this)
+    this.physics.add.collider(player2, bombs, hitBomb, null, this)
+
+    // al colicionar con el player las estrellas se desactivan
+    this.physics.add.overlap(player, stars, collectStar, null, null);
+    this.physics.add.overlap(player2, stars, collectStar, null, this);
+
 
 }
 
@@ -172,10 +186,14 @@ function collectStar(player, star) {
 
 }
 
-function hitBomb(player, bomb) {
+function hitBomb(player, player2, bomb) {
     this.physics.pause();
     player.setTint(0xff0000);
     player.anims.play('turn');
 
+    player2.setTint(0xff0000);
+    player2.anims.play('turn');
+
     gameOver = true;
 }
+
